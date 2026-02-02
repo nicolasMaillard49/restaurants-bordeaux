@@ -19,6 +19,10 @@ class ReviewDto {
 
 export class CreateRestaurantDto {
   @IsString()
+  @IsOptional()
+  google_place_id?: string;
+
+  @IsString()
   name: string;
 
   @IsString()
@@ -29,6 +33,11 @@ export class CreateRestaurantDto {
   @Min(0)
   @Max(5)
   rating?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  rating_count?: number;
 
   @IsString()
   address: string;
@@ -64,6 +73,10 @@ export class CreateRestaurantDto {
   @IsOptional()
   @IsString({ each: true })
   types?: string[];
+
+  @IsString()
+  @IsOptional()
+  cuisine_origin?: string;
 
   @IsArray()
   @IsOptional()

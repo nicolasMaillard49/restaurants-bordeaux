@@ -89,6 +89,20 @@ services:
     networks:
       - restaurants-network
 
+  # Service Playwright pour scraping photos
+  playwright:
+    build:
+      context: ./playwright-service
+      dockerfile: Dockerfile
+    container_name: restaurants-playwright
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+    ports:
+      - "3002:3002"
+    networks:
+      - restaurants-network
+
 networks:
   restaurants-network:
     driver: bridge

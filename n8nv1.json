@@ -1,0 +1,681 @@
+{
+    "nodes": [
+        {
+            "parameters": {},
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -5424,
+                9520
+            ],
+            "id": "2fd154c8-7ea8-4d7e-8ab3-587e0440dc38",
+            "name": "Manual Trigger"
+        },
+        {
+            "parameters": {
+                "jsCode": "console.log('Import request payload:', JSON.stringify($json));\nreturn { json: $json };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -2304,
+                9632
+            ],
+            "id": "87b85df7-6008-4c4a-bf2f-afbde5862cc8",
+            "name": "Debug Import Payload",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const searches = [\n  \"restaurant français bordeaux\",\n  \"restaurant italien bordeaux\",\n  \"restaurant japonais bordeaux\",\n  \"bistrot bordeaux\",\n  \"restaurant gastronomique bordeaux\",\n  \"restaurant la rencontre bordeaux\",\n  \"restaurant palantino\",\n\n];\nreturn searches.map(query => ({ json: { query } }));"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -5200,
+                9520
+            ],
+            "id": "58abc82c-991a-46e7-b35a-80ea41a8c6df",
+            "name": "Liste des recherches3"
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                -4992,
+                9520
+            ],
+            "id": "f24cb725-dbda-4b7e-8f2c-9ef06252da3f",
+            "name": "Loop Searches3"
+        },
+        {
+            "parameters": {
+                "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "query",
+                            "value": "={{ $json.query }}"
+                        },
+                        {
+                            "name": "key",
+                            "value": "AIzaSyBoOcs0Ob0MBKRDVZ37wVeIECTIsqsEBQ8"
+                        },
+                        {
+                            "name": "language",
+                            "value": "fr"
+                        },
+                        {
+                            "name": "type",
+                            "value": "restaurant"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -4800,
+                9520
+            ],
+            "id": "22c08589-8b48-4728-b537-b434c594cc95",
+            "name": "Google Maps Search3"
+        },
+        {
+            "parameters": {
+                "jsCode": "const response = $input.all()[0].json;\nconsole.log('Google API returned', response.results?.length || 0, 'results');\nconsole.log('Query was:', $input.all()[0].json.query || 'unknown');\nif (!response.results || response.results.length === 0) {\n  return [];\n}\nreturn response.results.map(r => ({ json: r }));"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -4592,
+                9520
+            ],
+            "id": "c2f73322-c2e1-46b4-8596-7b48c6a2164d",
+            "name": "Extract Results3"
+        },
+        {
+            "parameters": {
+                "jsCode": "return $input.all().slice(0, 30);"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -4400,
+                9520
+            ],
+            "id": "b6e2fa0c-62bb-44e0-a2fd-a05f769abb13",
+            "name": "Limit Results3"
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                -4192,
+                9520
+            ],
+            "id": "603bb9a7-4e1b-445e-9791-8d2884da9766",
+            "name": "Loop Restaurants3"
+        },
+        {
+            "parameters": {
+                "url": "https://maps.googleapis.com/maps/api/place/details/json",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "place_id",
+                            "value": "={{ $json.place_id }}"
+                        },
+                        {
+                            "name": "fields",
+                            "value": "name,formatted_address,rating,website,formatted_phone_number,opening_hours,price_level,reviews,url,types,user_ratings_total,business_status"
+                        },
+                        {
+                            "name": "key",
+                            "value": "AIzaSyBoOcs0Ob0MBKRDVZ37wVeIECTIsqsEBQ8"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -4000,
+                9520
+            ],
+            "id": "9135c21e-79e6-49fa-95c8-4bea59c1624b",
+            "name": "Place Details (sans photos)3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const restaurant = $input.item.json.result;\nconst extractCity = (address) => {\n  if (!address) return 'Bordeaux';\n  const match = address.match(/\\d{5}\\s+([^,]+)/);\n  return match ? match[1].trim() : 'Bordeaux';\n};\nconst getCategories = (types) => {\n  if (!types) return [];\n  const excluded = ['establishment', 'point_of_interest', 'food'];\n  return types.filter(t => !excluded.includes(t));\n};\nreturn {\n  json: {\n    name: restaurant.name || 'Restaurant',\n    rating: restaurant.rating || 0,\n    review_count: restaurant.user_ratings_total || 0,\n    address: restaurant.formatted_address || '',\n    city: extractCity(restaurant.formatted_address),\n    place_id: restaurant.place_id || '',\n    website: restaurant.website || null,\n    phone: restaurant.formatted_phone_number || null,\n    opening_hours: restaurant.opening_hours?.weekday_text || [],\n    price_level: restaurant.price_level || null,\n    google_maps_url: restaurant.url || null,\n    types: getCategories(restaurant.types),\n    reviews: (restaurant.reviews || []).slice(0, 5).map(r => ({\n      author: r.author_name,\n      rating: r.rating,\n      text: r.text,\n      date: r.relative_time_description\n    }))\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -3792,
+                9520
+            ],
+            "id": "993f502a-48c1-4eb5-84b7-87ff62f986be",
+            "name": "Format Restaurant Data3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://playwright:3002/scrape-photos",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({ website: $json.website }) }}",
+                "options": {
+                    "timeout": 30000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -3600,
+                9520
+            ],
+            "id": "a660ea48-b103-427e-852b-966b60b45695",
+            "name": "Playwright Scraper3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "condition1",
+                            "leftValue": "={{ $json.photos.length }}",
+                            "rightValue": 0,
+                            "operator": {
+                                "type": "number",
+                                "operation": "gt"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                -3392,
+                9520
+            ],
+            "id": "a58d514c-9c44-4230-a3e3-cdeb52dc5a58",
+            "name": "Photos trouvées ?3"
+        },
+        {
+            "parameters": {
+                "url": "https://maps.googleapis.com/maps/api/place/details/json",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "place_id",
+                            "value": "={{ $('Place Details (sans photos)3').item.json.result.place_id }}"
+                        },
+                        {
+                            "name": "fields",
+                            "value": "photos"
+                        },
+                        {
+                            "name": "key",
+                            "value": "AIzaSyBoOcs0Ob0MBKRDVZ37wVeIECTIsqsEBQ8"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -3200,
+                9712
+            ],
+            "id": "bc7279e8-3d45-4645-9742-07ea2f051839",
+            "name": "Google Photos API (Fallback)3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const restaurantData = $('Format Restaurant Data3').item.json;\nconst photosNode = $('Playwright Scraper3').item.json;\nconst photos = photosNode?.photos || [];\nconst photoSource = photosNode?.source || 'playwright';\n\nreturn {\n  json: {\n    ...restaurantData,\n    photos: photos,\n    photo_source: photoSource\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -3056,
+                9392
+            ],
+            "id": "37e18618-97aa-47ed-91ab-2c59cd78a174",
+            "name": "Merge avec Playwright Photos3"
+        },
+        {
+            "parameters": {
+                "jsCode": "const restaurantData = $('Format Restaurant Data3').item.json;\nconst googleResponse = $json.result;\nlet photos = [];\nif (googleResponse?.photos) {\n  const apiKey = 'AIzaSyBoOcs0Ob0MBKRDVZ37wVeIECTIsqsEBQ8';\n  photos = googleResponse.photos.slice(0, 3).map(p => \n    `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photo_reference}&key=${apiKey}`\n  );\n}\nreturn {\n  json: {\n    ...restaurantData,\n    photos: photos,\n    photo_source: 'google_maps'\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -2992,
+                9712
+            ],
+            "id": "985cd4d4-6636-44de-8e2c-13b2a9392fc8",
+            "name": "Merge avec Google Photos3"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer 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"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un rédacteur web spécialisé en gastronomie. Tu dois retourner UNIQUEMENT un objet JSON valide, sans markdown, sans ```json, sans explication.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Restaurant: {{ $json.name }}\\nNote: {{ $json.rating }}/5\\nAdresse: {{ $json.address }}\\nTypes: {{ $json.types }}\\n\\nRetourne un JSON avec ces champs:\\n{\\n  \\\"description\\\": \\\"Description professionnelle 2-3 phrases\\\",\\n  \\\"category\\\": [\\\"restaurant\\\", \\\"bistro\\\"],\\n  \\\"cuisine_origin\\\": \\\"française\\\"\\n}\\n\\nPour category: PEUT CONTENIR PLUSIEURS VALEURS. Valeurs possibles = restaurant, bar, bistro, gastro, cafe, brasserie, pub, wine_bar, tapas, fast_food, pizzeria, creperie, salon_de_the, traiteur, food_court. Tu peux combiner plusieurs catégories selon le type d'établissement. Exemples: [\\\"restaurant\\\", \\\"gastro\\\", \\\"bistro\\\"] pour un bistro gastronomique, [\\\"bar\\\", \\\"tapas\\\"] pour un bar à tapas, [\\\"restaurant\\\", \\\"pizzeria\\\"] pour une pizzeria, [\\\"cafe\\\", \\\"salon_de_the\\\"] pour un salon de thé. Pour cuisine_origin: française, italienne, japonaise, chinoise, indienne, mexicaine, espagnole, thaïlandaise, vietnamienne, libanaise, marocaine, américaine, fusion, autre.\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 300\n}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -2592,
+                9520
+            ],
+            "id": "9adf0588-2d53-4ab2-8c96-4a49b6c8704e",
+            "name": "Groq Description3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Les données Groq sont dans le node actuel\nconst groqRaw = $json.choices[0].message.content;\nlet groqData;\ntry {\n  const cleaned = groqRaw.replace(/```json/g, '').replace(/```/g, '').trim();\n  groqData = JSON.parse(cleaned);\n} catch (e) {\n  groqData = {\n    description: groqRaw,\n    category: ['restaurant'],\n    cuisine_origin: 'française'\n  };\n}\n\n// Les données restaurant (avec photos) viennent soit de Merge avec Playwright, soit de Merge avec Google\n// On peut les récupérer via le node parent\nlet restaurant;\ntry {\n  restaurant = $('Merge avec Playwright Photos3').item.json;\n} catch {\n  restaurant = $('Merge avec Google Photos3').item.json;\n}\n\nreturn {\n  json: {\n    name: restaurant.name,\n    description: groqData.description || '',\n    rating: restaurant.rating,\n    review_count: restaurant.review_count,\n    category: Array.isArray(groqData.category) ? groqData.category : [groqData.category],\n    cuisine_origin: groqData.cuisine_origin || 'autre',\n    address: restaurant.address,\n    city: restaurant.city,\n    website: restaurant.website,\n    phone: restaurant.phone,\n    opening_hours: restaurant.opening_hours,\n    price_level: restaurant.price_level,\n    google_maps_url: restaurant.google_maps_url,\n    types: restaurant.types,\n    reviews: restaurant.reviews,\n    images: restaurant.photos || [],\n    source: restaurant.photo_source || 'aucune'\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -2400,
+                9520
+            ],
+            "id": "0ef85c57-4238-4b31-b239-c80ad1392cf8",
+            "name": "Parse Groq + Assemble3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://backend:3000/scraper/import",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "x-api-key",
+                            "value": "nicolas123"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "value": "={{ $json.name }}"
+                        },
+                        {
+                            "name": "description",
+                            "value": "={{ $json.description }}"
+                        },
+                        {
+                            "name": "rating",
+                            "value": "={{ $json.rating }}"
+                        },
+                        {
+                            "name": "address",
+                            "value": "={{ $json.address }}"
+                        },
+                        {
+                            "name": "city",
+                            "value": "={{ $json.city }}"
+                        },
+                        {
+                            "name": "website",
+                            "value": "={{ $json.website }}"
+                        },
+                        {
+                            "name": "phone",
+                            "value": "={{ $json.phone }}"
+                        },
+                        {
+                            "name": "opening_hours",
+                            "value": "={{ $json.opening_hours }}"
+                        },
+                        {
+                            "name": "price_level",
+                            "value": "={{ $json.price_level }}"
+                        },
+                        {
+                            "name": "google_maps_url",
+                            "value": "={{ $json.google_maps_url }}"
+                        },
+                        {
+                            "name": "types",
+                            "value": "={{ $json.category }}"
+                        },
+                        {
+                            "name": "reviews",
+                            "value": "={{ $json.reviews }}"
+                        },
+                        {
+                            "name": "images",
+                            "value": "={{ $json.images }}"
+                        },
+                        {
+                            "name": "source",
+                            "value": "={{ $json.source }}"
+                        },
+                        {
+                            "name": "cuisine_origin",
+                            "value": "={{ $json.cuisine_origin }}"
+                        },
+                        {
+                            "name": "rating_count",
+                            "value": "={{ $('Place Details (sans photos)3').item.json.result.user_ratings_total }}"
+                        },
+                        {
+                            "name": "google_place_id",
+                            "value": "={{ $('Place Details (sans photos)3').item.json.result.place_id }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -2192,
+                9520
+            ],
+            "id": "5129eb01-f627-4aac-b136-1bf8f6b75c7d",
+            "name": "Import to Backend3",
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const resp = $json;\nconsole.log('Import response:', JSON.stringify(resp));\nconst status = resp.statusCode || resp.status || null;\nconst body = resp.body || resp;\nif (status && status >= 400) {\n  console.error('❌ Import failed', status, body);\n} else {\n  const action = body && body.action ? body.action : 'unknown';\n  const name = (body && body.restaurant && body.restaurant.name) || body.name || 'unknown';\n  console.log(`✅ Restaurant ${action}:`, name);\n}\nreturn { json: resp };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -2000,
+                9520
+            ],
+            "id": "458bc9f3-c8c4-4d75-9eaa-e9339a3c0a76",
+            "name": "Log Success3"
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Liste des recherches3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Debug Import Payload": {
+            "main": [
+                [
+                    {
+                        "node": "Import to Backend3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Liste des recherches3": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Searches3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Searches3": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "Google Maps Search3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Maps Search3": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Results3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Results3": {
+            "main": [
+                [
+                    {
+                        "node": "Limit Results3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limit Results3": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Restaurants3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Restaurants3": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Searches3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Place Details (sans photos)3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Place Details (sans photos)3": {
+            "main": [
+                [
+                    {
+                        "node": "Format Restaurant Data3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Restaurant Data3": {
+            "main": [
+                [
+                    {
+                        "node": "Playwright Scraper3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Playwright Scraper3": {
+            "main": [
+                [
+                    {
+                        "node": "Photos trouvées ?3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Photos trouvées ?3": {
+            "main": [
+                [
+                    {
+                        "node": "Merge avec Playwright Photos3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Google Photos API (Fallback)3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Photos API (Fallback)3": {
+            "main": [
+                [
+                    {
+                        "node": "Merge avec Google Photos3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge avec Playwright Photos3": {
+            "main": [
+                [
+                    {
+                        "node": "Groq Description3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge avec Google Photos3": {
+            "main": [
+                [
+                    {
+                        "node": "Groq Description3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Description3": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Groq + Assemble3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Groq + Assemble3": {
+            "main": [
+                [
+                    {
+                        "node": "Debug Import Payload",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Import to Backend3": {
+            "main": [
+                [
+                    {
+                        "node": "Log Success3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Success3": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Restaurants3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "instanceId": "2a1cec70b32c558ac32f0e6d4c07d654484bd16978732619dc99d3cd7b3ff86f"
+    }
+}
