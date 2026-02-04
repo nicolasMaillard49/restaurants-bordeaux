@@ -14,6 +14,14 @@ app.post('/scrape-photos', async (req, res) => {
         });
     }
 
+    // Skip scraping if website URL contains 'instagram'
+    if (website.toLowerCase().includes('instagram')) {
+        return res.json({
+            photos: [],
+            source: 'instagram_skipped'
+        });
+    }
+
     try {
         // Utilisation avec variables d'environnement
         const browser = await chromium.launch({
