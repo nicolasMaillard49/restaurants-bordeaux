@@ -9,7 +9,7 @@ export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private restaurantsRepository: Repository<Restaurant>,
-  ) {}
+  ) { }
 
   /**
    * Récupère tous les restaurants
@@ -39,26 +39,64 @@ export class RestaurantsService {
   }
 
   /**
+   * Normalise une chaîne pour la comparaison (minuscules, espaces simplifiés)
+   */
+  private normalizeString(str: string): string {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ') // Remplace multiples espaces par un seul
+      .replace(/[áàâä]/g, 'a')
+      .replace(/[éèêë]/g, 'e')
+      .replace(/[íìîï]/g, 'i')
+      .replace(/[óòôö]/g, 'o')
+      .replace(/[úùûü]/g, 'u')
+      .replace(/ç/g, 'c');
+  }
+
+  /**
    * Crée ou met à jour un restaurant (upsert)
-   * Détecte les doublons via name + address
+   * Priorité de détection des doublons:
+   * 1. google_place_id (si fourni)
+   * 2. name + address normalisés (fallback)
    */
   async upsert(createRestaurantDto: CreateRestaurantDto): Promise<Restaurant> {
-    const { name, address } = createRestaurantDto;
+    const { name, address, google_place_id } = createRestaurantDto;
 
-    // Recherche d'un doublon existant
-    const existing = await this.restaurantsRepository.findOne({
-      where: { name, address },
-    });
+    let existing: Restaurant | null = null;
+
+    // Priorité 1: Recherche par google_place_id
+    if (google_place_id) {
+      existing = await this.restaurantsRepository.findOne({
+        where: { google_place_id },
+      });
+
+      if (existing) {
+        // Supprimer l'ancien et créer un nouveau avec les données fraîches
+        await this.restaurantsRepository.delete(existing.id);
+        const newRestaurant = this.restaurantsRepository.create({
+          ...createRestaurantDto,
+          city: createRestaurantDto.city || 'Bordeaux',
+          last_update: new Date(),
+        });
+        return this.restaurantsRepository.save(newRestaurant);
+      }
+    }
+
+    // Priorité 2: Recherche par name + address normalisés
+    const normalizedName = this.normalizeString(name);
+    const normalizedAddress = this.normalizeString(address);
+
+    const allRestaurants = await this.restaurantsRepository.find();
+    existing = allRestaurants.find(
+      (r) =>
+        this.normalizeString(r.name) === normalizedName &&
+        this.normalizeString(r.address) === normalizedAddress,
+    ) || null;
 
     if (existing) {
-      // Update
-      Object.assign(existing, {
-        ...createRestaurantDto,
-        last_update: new Date(),
-      });
-      return this.restaurantsRepository.save(existing);
-    } else {
-      // Insert
+      // Supprimer l'ancien et créer un nouveau avec les données fraîches
+      await this.restaurantsRepository.delete(existing.id);
       const newRestaurant = this.restaurantsRepository.create({
         ...createRestaurantDto,
         city: createRestaurantDto.city || 'Bordeaux',
@@ -66,6 +104,14 @@ export class RestaurantsService {
       });
       return this.restaurantsRepository.save(newRestaurant);
     }
+
+    // Insert nouveau restaurant
+    const newRestaurant = this.restaurantsRepository.create({
+      ...createRestaurantDto,
+      city: createRestaurantDto.city || 'Bordeaux',
+      last_update: new Date(),
+    });
+    return this.restaurantsRepository.save(newRestaurant);
   }
 
   /**

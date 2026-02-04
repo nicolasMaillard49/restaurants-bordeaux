@@ -95,7 +95,38 @@ export const translations = {
       reviews: 'Avis clients',
       photos: 'Photos',
       source: 'Source',
-      lastUpdate: 'Dernière mise à jour'
+      lastUpdate: 'Dernière mise à jour',
+      cuisineOrigin: 'Origine de la cuisine'
+    },
+    types: {
+      restaurant: 'Restaurant',
+      food: 'Nourriture',
+      point_of_interest: "Point d'intérêt",
+      establishment: 'Établissement',
+      meal_takeaway: 'Plats à emporter',
+      meal_delivery: 'Livraison de repas',
+      bar: 'Bar',
+      cafe: 'Café',
+      bakery: 'Boulangerie',
+      night_club: 'Boîte de nuit',
+      store: 'Magasin',
+      lodging: 'Hébergement',
+      french_restaurant: 'Restaurant français',
+      italian_restaurant: 'Restaurant italien',
+      japanese_restaurant: 'Restaurant japonais',
+      chinese_restaurant: 'Restaurant chinois',
+      indian_restaurant: 'Restaurant indien',
+      mexican_restaurant: 'Restaurant mexicain',
+      seafood_restaurant: 'Restaurant de fruits de mer',
+      steak_house: 'Steakhouse',
+      sushi_restaurant: 'Restaurant de sushi',
+      vegetarian_restaurant: 'Restaurant végétarien',
+      vegan_restaurant: 'Restaurant végan',
+      fast_food_restaurant: 'Fast-food',
+      pizza_restaurant: 'Pizzeria',
+      sandwich_shop: 'Sandwicherie',
+      ice_cream_shop: 'Glacier',
+      coffee_shop: 'Café'
     }
   },
   en: {
@@ -162,7 +193,38 @@ export const translations = {
       reviews: 'Customer reviews',
       photos: 'Photos',
       source: 'Source',
-      lastUpdate: 'Last update'
+      lastUpdate: 'Last update',
+      cuisineOrigin: 'Cuisine origin'
+    },
+    types: {
+      restaurant: 'Restaurant',
+      food: 'Food',
+      point_of_interest: 'Point of interest',
+      establishment: 'Establishment',
+      meal_takeaway: 'Takeaway',
+      meal_delivery: 'Meal delivery',
+      bar: 'Bar',
+      cafe: 'Cafe',
+      bakery: 'Bakery',
+      night_club: 'Night club',
+      store: 'Store',
+      lodging: 'Lodging',
+      french_restaurant: 'French restaurant',
+      italian_restaurant: 'Italian restaurant',
+      japanese_restaurant: 'Japanese restaurant',
+      chinese_restaurant: 'Chinese restaurant',
+      indian_restaurant: 'Indian restaurant',
+      mexican_restaurant: 'Mexican restaurant',
+      seafood_restaurant: 'Seafood restaurant',
+      steak_house: 'Steakhouse',
+      sushi_restaurant: 'Sushi restaurant',
+      vegetarian_restaurant: 'Vegetarian restaurant',
+      vegan_restaurant: 'Vegan restaurant',
+      fast_food_restaurant: 'Fast food',
+      pizza_restaurant: 'Pizza restaurant',
+      sandwich_shop: 'Sandwich shop',
+      ice_cream_shop: 'Ice cream shop',
+      coffee_shop: 'Coffee shop'
     }
   },
   es: {
@@ -229,7 +291,38 @@ export const translations = {
       reviews: 'Opiniones de clientes',
       photos: 'Fotos',
       source: 'Fuente',
-      lastUpdate: 'Última actualización'
+      lastUpdate: 'Última actualización',
+      cuisineOrigin: 'Origen de la cocina'
+    },
+    types: {
+      restaurant: 'Restaurante',
+      food: 'Comida',
+      point_of_interest: 'Punto de interés',
+      establishment: 'Establecimiento',
+      meal_takeaway: 'Para llevar',
+      meal_delivery: 'Entrega a domicilio',
+      bar: 'Bar',
+      cafe: 'Café',
+      bakery: 'Panadería',
+      night_club: 'Club nocturno',
+      store: 'Tienda',
+      lodging: 'Alojamiento',
+      french_restaurant: 'Restaurante francés',
+      italian_restaurant: 'Restaurante italiano',
+      japanese_restaurant: 'Restaurante japonés',
+      chinese_restaurant: 'Restaurante chino',
+      indian_restaurant: 'Restaurante indio',
+      mexican_restaurant: 'Restaurante mexicano',
+      seafood_restaurant: 'Restaurante de mariscos',
+      steak_house: 'Asador',
+      sushi_restaurant: 'Restaurante de sushi',
+      vegetarian_restaurant: 'Restaurante vegetariano',
+      vegan_restaurant: 'Restaurante vegano',
+      fast_food_restaurant: 'Comida rápida',
+      pizza_restaurant: 'Pizzería',
+      sandwich_shop: 'Bocadillería',
+      ice_cream_shop: 'Heladería',
+      coffee_shop: 'Cafetería'
     }
   }
 }
@@ -239,6 +332,20 @@ export const useTranslations = () => {
 
   const t = computed(() => translations[locale.value])
 
-  return { t }
+  const translateType = (type: string): string => {
+    // Nettoyer le type (enlever espaces, convertir en snake_case)
+    const cleanType = type.toLowerCase().trim().replace(/\s+/g, '_')
+
+    // Chercher dans les traductions
+    const typeTranslations = translations[locale.value].types as Record<string, string>
+
+    // Retourner la traduction ou le type formaté
+    return typeTranslations[cleanType] || type.split('_').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ')
+  }
+
+  return { t, translateType }
 }
+
 

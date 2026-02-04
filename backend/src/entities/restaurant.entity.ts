@@ -13,6 +13,9 @@ export class Restaurant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  google_place_id: string;
+
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
@@ -31,6 +34,9 @@ export class Restaurant {
     },
   })
   rating: number;
+
+  @Column({ type: 'int', nullable: true })
+  rating_count: number;
 
   @Column({ type: 'varchar', length: 500 })
   address: string;
@@ -55,6 +61,9 @@ export class Restaurant {
 
   @Column({ type: 'jsonb', nullable: true })
   types: string[];
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  cuisine_origin: string;
 
   @Column({ type: 'jsonb', nullable: true })
   reviews: Array<{
