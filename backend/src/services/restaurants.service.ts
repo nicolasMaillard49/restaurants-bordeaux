@@ -57,11 +57,16 @@ export class RestaurantsService {
   /**
    * Crée ou met à jour un restaurant (upsert)
    * Priorité de détection des doublons:
-   * 1. google_place_id (si fourni)
+   * 1. google_place_id (si fourni et non vide)
    * 2. name + address normalisés (fallback)
    */
   async upsert(createRestaurantDto: CreateRestaurantDto): Promise<Restaurant> {
-    const { name, address, google_place_id } = createRestaurantDto;
+    // Ne pas garder google_place_id vide : contrainte UNIQUE en base, "" provoque une erreur 500
+    const dto = { ...createRestaurantDto } as CreateRestaurantDto;
+    if (dto.google_place_id === '' || dto.google_place_id == null) {
+      dto.google_place_id = undefined;
+    }
+    const { name, address, google_place_id } = dto;
 
     let existing: Restaurant | null = null;
 
@@ -72,18 +77,16 @@ export class RestaurantsService {
       });
 
       if (existing) {
-        // Supprimer l'ancien et créer un nouveau avec les données fraîches
         await this.restaurantsRepository.delete(existing.id);
         const newRestaurant = this.restaurantsRepository.create({
-          ...createRestaurantDto,
-          city: createRestaurantDto.city || 'Bordeaux',
+          ...dto,
+          city: dto.city || 'Bordeaux',
           last_update: new Date(),
         });
         return this.restaurantsRepository.save(newRestaurant);
       }
     }
 
-    // Priorité 2: Recherche par name + address normalisés
     const normalizedName = this.normalizeString(name);
     const normalizedAddress = this.normalizeString(address);
 
@@ -95,20 +98,18 @@ export class RestaurantsService {
     ) || null;
 
     if (existing) {
-      // Supprimer l'ancien et créer un nouveau avec les données fraîches
       await this.restaurantsRepository.delete(existing.id);
       const newRestaurant = this.restaurantsRepository.create({
-        ...createRestaurantDto,
-        city: createRestaurantDto.city || 'Bordeaux',
+        ...dto,
+        city: dto.city || 'Bordeaux',
         last_update: new Date(),
       });
       return this.restaurantsRepository.save(newRestaurant);
     }
 
-    // Insert nouveau restaurant
     const newRestaurant = this.restaurantsRepository.create({
-      ...createRestaurantDto,
-      city: createRestaurantDto.city || 'Bordeaux',
+      ...dto,
+      city: dto.city || 'Bordeaux',
       last_update: new Date(),
     });
     return this.restaurantsRepository.save(newRestaurant);
