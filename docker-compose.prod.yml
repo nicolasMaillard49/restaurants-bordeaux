@@ -1,0 +1,117 @@
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: prod-restaurants-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-restaurants}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-restaurants}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend NestJS (build prod)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: prod-restaurants-backend
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-postgres}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DATABASE_NAME: ${POSTGRES_DB:-restaurants}
+      API_SECRET_KEY: ${API_SECRET_KEY:-change-me}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  # Frontend Nuxt 3 SSR (build prod)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:3000}
+        API_BASE_INTERNAL: http://backend:3000
+    container_name: prod-restaurants-frontend
+    restart: always
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:3000}
+      API_BASE_INTERNAL: http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - internal
+
+  # Playwright (scraping)
+  playwright:
+    build:
+      context: ./playwright-service
+      dockerfile: Dockerfile
+    container_name: prod-restaurants-playwright
+    restart: always
+    environment:
+      PORT: 3002
+    networks:
+      - internal
+
+  # n8n (automatisation)
+  n8n:
+    build:
+      context: ./n8n
+      dockerfile: Dockerfile
+    container_name: prod-restaurants-n8n
+    restart: always
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678}
+      - GENERIC_TIMEZONE=${TIMEZONE:-Europe/Paris}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - internal
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: prod-restaurants-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  n8n_data:

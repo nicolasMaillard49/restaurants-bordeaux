@@ -341,19 +341,31 @@ docker stats
 
 ## 8. Mise à jour de l'application
 
+Procédure à suivre après chaque modification du code (développement en local → commit → push) pour appliquer les changements en production.
+
 ```bash
 cd /opt/restaurants-bordeaux
 
 # Récupérer les dernières modifications
 git pull
 
-# Reconstruire et redémarrer
+# Reconstruire et redémarrer tous les services
 docker compose down
 docker compose up -d --build
 
-# Vérifier les logs
+# Vérifier que les conteneurs tournent
+docker compose ps
+
+# Surveiller les logs en cas de problème
 docker compose logs -f
 ```
+
+**Cas particuliers :**
+
+- **Un seul service modifié** (ex. frontend) : `docker compose up -d --build frontend` pour ne reconstruire que ce service.
+- **Variables d'environnement modifiées** (fichier `.env`) : après édition, `docker compose up -d`. Si la variable est utilisée au build du frontend (ex. `NUXT_PUBLIC_API_BASE`), faire aussi `docker compose up -d --build frontend`.
+- **Nouvelles migrations de base de données** : après le `git pull`, exécuter les migrations (ex. `docker compose exec backend npm run typeorm migration:run` si configuré).
+- **Retour en arrière** : `git checkout <commit-précédent>` puis `docker compose up -d --build`.
 
 ## 9. Résolution de problèmes
 

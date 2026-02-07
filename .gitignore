@@ -10,6 +10,7 @@ dist/
 # Environment files
 .env
 .env.local
+.env.prod
 .env.*.local
 
 # Logs
@@ -46,3 +47,4 @@ gitignore
 
 # Claude local settings
 .claude/settings.local.json
+docs/workflow_n8n_scrapp_restau.json

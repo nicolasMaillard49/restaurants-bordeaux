@@ -69,6 +69,10 @@ export class CreateRestaurantDto {
   @IsOptional()
   google_maps_url?: string;
 
+  @IsUrl()
+  @IsOptional()
+  reservation_url?: string;
+
   @IsArray()
   @IsOptional()
   @IsString({ each: true })

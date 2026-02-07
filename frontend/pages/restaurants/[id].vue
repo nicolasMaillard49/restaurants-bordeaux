@@ -25,7 +25,7 @@
               </div>
               <h1 class="text-xl sm:text-2xl font-serif text-[#1A1A1A] mb-2">{{ t.ui.notFoundTitle }}</h1>
               <p class="text-[#666] mb-8 text-sm sm:text-base">{{ t.ui.notFoundDescription }}</p>
-              <NuxtLink
+              <UButton
                 to="/"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-[#722F37] text-white rounded-full font-medium hover:bg-[#5a252c] transition-colors cursor-pointer min-h-[44px]"
               >
@@ -33,7 +33,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 {{ t.restaurant.backToList }}
-              </NuxtLink>
+              </UButton>
             </div>
           </div>
 
@@ -187,80 +187,133 @@
             <main class="relative bg-[#FAF9F6]">
               <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-0 pb-8">
                 <!-- Floating Action Cards -->
-                <div class="flex gap-3 sm:gap-4 mb-8 sm:mb-12 -mt-4 sm:-mt-8 relative z-20 overflow-x-auto pb-1 scrollbar-hide">
-                  <!-- Call Card -->
-                  <a
-                    v-if="restaurant.phone"
-                    :href="`tel:${restaurant.phone}`"
-                    class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
+                <div class="mb-8 sm:mb-12 -mt-4 sm:-mt-8 relative z-20 space-y-3 sm:space-y-0">
+                  <!-- Scrollable row: Call, Website, Maps + Reservation on desktop -->
+                  <div class="relative">
+                    <div class="flex gap-3 sm:gap-4 overflow-x-auto pb-1 scrollbar-hide">
+                      <!-- Call Card -->
+                      <a
+                        v-if="restaurant.phone"
+                        :href="`tel:${restaurant.phone}`"
+                        class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
   shadow-black/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300
   cursor-pointer min-w-[200px] sm:min-w-0 flex-1"
-                  >
-                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
+                      >
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
   justify-center group-hover:bg-[#722F37] transition-colors">
-                      <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
+                          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
   transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
   d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257
   1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0
   01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.phone }}</p>
-                      <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base truncate">{{ restaurant.phone }}</p>
-                    </div>
-                  </a>
+                          </svg>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.phone }}</p>
+                          <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base truncate">{{ restaurant.phone }}</p>
+                        </div>
+                      </a>
 
-                  <!-- Website Card -->
-                  <a
-                    v-if="restaurant.website"
-                    :href="restaurant.website"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
+                      <!-- Website Card -->
+                      <a
+                        v-if="restaurant.website"
+                        :href="restaurant.website"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
   shadow-black/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300
   cursor-pointer min-w-[200px] sm:min-w-0 flex-1"
-                  >
-                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
+                      >
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
   justify-center group-hover:bg-[#722F37] transition-colors">
-                      <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
+                          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
   transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
   d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03
   3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                      </svg>
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.website }}</p>
-                      <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base">{{ t.restaurant.visitWebsite
+                          </svg>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.website }}</p>
+                          <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base">{{ t.restaurant.visitWebsite
   }}</p>
-                    </div>
-                  </a>
+                        </div>
+                      </a>
 
-                  <!-- Maps Card -->
-                  <a
-                    v-if="restaurant.google_maps_url"
-                    :href="restaurant.google_maps_url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
+                      <!-- Maps Card -->
+                      <a
+                        v-if="restaurant.google_maps_url"
+                        :href="restaurant.google_maps_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl shadow-lg
   shadow-black/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300
   cursor-pointer min-w-[200px] sm:min-w-0 flex-1"
-                  >
-                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
+                      >
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 flex items-center flex-shrink-0
   justify-center group-hover:bg-[#722F37] transition-colors">
-                      <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
+                          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#722F37] group-hover:text-white
   transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.address }}</p>
+                          <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base">{{ t.restaurant.viewOnMaps }}</p>
+                        </div>
+                      </a>
+
+                      <!-- Reservation Card (desktop only - inline with others) -->
+                      <a
+                        v-if="restaurant.reservation_url"
+                        :href="restaurant.reservation_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hidden sm:flex group items-center gap-4 p-5 bg-[#722F37] rounded-2xl shadow-lg
+  shadow-black/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300
+  cursor-pointer flex-1"
+                      >
+                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center flex-shrink-0
+  justify-center group-hover:bg-white/30 transition-colors">
+                          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm text-white/70 mb-0.5">{{ t.restaurant.reservation }}</p>
+                          <p class="font-semibold text-white text-base">{{ t.restaurant.bookTable }}</p>
+                        </div>
+                      </a>
+                    </div>
+                    <!-- Scroll indicator (mobile only) -->
+                    <div class="sm:hidden absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-[#FAF9F6] to-transparent pointer-events-none rounded-r-2xl"></div>
+                  </div>
+
+                  <!-- Reservation Card (mobile only - full width below) -->
+                  <a
+                    v-if="restaurant.reservation_url"
+                    :href="restaurant.reservation_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sm:hidden group flex items-center justify-center gap-3 p-4 bg-[#722F37] rounded-2xl shadow-lg
+  shadow-black/5 hover:shadow-xl transition-all duration-300
+  cursor-pointer w-full"
+                  >
+                    <div class="w-11 h-11 rounded-full bg-white/20 flex items-center flex-shrink-0
+  justify-center group-hover:bg-white/30 transition-colors">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
                     <div class="min-w-0">
-                      <p class="text-xs sm:text-sm text-[#666] mb-0.5">{{ t.restaurant.address }}</p>
-                      <p class="font-semibold text-[#1A1A1A] text-sm sm:text-base">{{ t.restaurant.viewOnMaps }}</p>
+                      <p class="text-xs text-white/70 mb-0.5">{{ t.restaurant.reservation }}</p>
+                      <p class="font-semibold text-white text-sm">{{ t.restaurant.bookTable }}</p>
                     </div>
                   </a>
                 </div>
