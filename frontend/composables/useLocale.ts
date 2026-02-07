@@ -98,7 +98,10 @@ export const translations = {
       lastUpdate: 'Dernière mise à jour',
       cuisineOrigin: 'Origine de la cuisine',
       reservation: 'Réservation',
-      bookTable: 'Réserver une table'
+      bookTable: 'Réserver une table',
+      teamChoice: "Choix de l'équipe",
+      viewMenu: 'Voir le menu',
+      formulas: 'Formules'
     },
     types: {
       restaurant: 'Restaurant',
@@ -198,7 +201,10 @@ export const translations = {
       lastUpdate: 'Last update',
       cuisineOrigin: 'Cuisine origin',
       reservation: 'Reservation',
-      bookTable: 'Book a table'
+      bookTable: 'Book a table',
+      teamChoice: "Team's choice",
+      viewMenu: 'View menu',
+      formulas: 'Set menus'
     },
     types: {
       restaurant: 'Restaurant',
@@ -298,7 +304,10 @@ export const translations = {
       lastUpdate: 'Última actualización',
       cuisineOrigin: 'Origen de la cocina',
       reservation: 'Reserva',
-      bookTable: 'Reservar una mesa'
+      bookTable: 'Reservar una mesa',
+      teamChoice: 'Elección del equipo',
+      viewMenu: 'Ver el menú',
+      formulas: 'Menús'
     },
     types: {
       restaurant: 'Restaurante',
