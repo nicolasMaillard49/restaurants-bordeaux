@@ -1,0 +1,30 @@
+# === Étape 1 : Build ===
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+# Les variables d'environnement sont injectées au build pour le SSR
+ARG NUXT_PUBLIC_API_BASE=http://localhost:3000
+ARG API_BASE_INTERNAL=http://backend:3000
+ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
+ENV API_BASE_INTERNAL=$API_BASE_INTERNAL
+
+RUN npm run build
+
+# === Étape 2 : Production ===
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/.output ./.output
+
+ENV NODE_ENV=production
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]
