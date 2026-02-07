@@ -15,7 +15,7 @@
           <div class="flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center gap-2 sm:gap-3">
-              <img src="/favicon.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
+              <img :src="'/favicon.png'" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
               <span class="font-serif text-lg sm:text-xl text-white font-semibold">Bordeaux</span>
             </div>
             <LanguageSelector />
@@ -327,7 +327,7 @@
           <!-- Brand -->
           <div>
             <div class="flex items-center gap-3 mb-4">
-              <img src="/favicon.png" alt="Logo" class="w-10 h-10 rounded-full object-cover" />
+              <img :src="'/favicon.png'" alt="Logo" class="w-10 h-10 rounded-full object-cover" />
               <span class="font-serif text-xl font-semibold">{{ t.restaurant.pageTitle }}</span>
             </div>
             <p class="text-white/60 leading-relaxed">

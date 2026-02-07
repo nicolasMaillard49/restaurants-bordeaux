@@ -35,13 +35,5 @@ export default defineNuxtConfig({
     port: 3000
   },
 
-  vite: {
-    build: {
-      rollupOptions: {
-        external: ['/favicon.png']
-      }
-    }
-  },
-
   compatibilityDate: '2024-01-30'
 })
