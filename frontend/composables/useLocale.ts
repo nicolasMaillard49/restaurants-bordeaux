@@ -96,7 +96,9 @@ export const translations = {
       photos: 'Photos',
       source: 'Source',
       lastUpdate: 'Dernière mise à jour',
-      cuisineOrigin: 'Origine de la cuisine'
+      cuisineOrigin: 'Origine de la cuisine',
+      reservation: 'Réservation',
+      bookTable: 'Réserver une table'
     },
     types: {
       restaurant: 'Restaurant',
@@ -194,7 +196,9 @@ export const translations = {
       photos: 'Photos',
       source: 'Source',
       lastUpdate: 'Last update',
-      cuisineOrigin: 'Cuisine origin'
+      cuisineOrigin: 'Cuisine origin',
+      reservation: 'Reservation',
+      bookTable: 'Book a table'
     },
     types: {
       restaurant: 'Restaurant',
@@ -292,7 +296,9 @@ export const translations = {
       photos: 'Fotos',
       source: 'Fuente',
       lastUpdate: 'Última actualización',
-      cuisineOrigin: 'Origen de la cocina'
+      cuisineOrigin: 'Origen de la cocina',
+      reservation: 'Reserva',
+      bookTable: 'Reservar una mesa'
     },
     types: {
       restaurant: 'Restaurante',

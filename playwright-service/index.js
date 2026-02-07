@@ -136,6 +136,77 @@ app.post('/scrape-photos', async (req, res) => {
     }
 });
 
+app.post('/scrape-reservation', async (req, res) => {
+    const { website } = req.body;
+
+    if (!website) {
+        return res.json({ reservation_url: null });
+    }
+
+    const KEYWORDS = ['reserv', 'réserv', 'reserver', 'book', 'booking', 'table', 'resa'];
+
+    const matchesKeyword = (url) => {
+        const lower = (url || '').toLowerCase();
+        return KEYWORDS.some(kw => lower.includes(kw));
+    };
+
+    let page = null;
+    try {
+        // 1. Try sitemap.xml first (fast, no browser needed)
+        const sitemapUrl = new URL('/sitemap.xml', website).href;
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            const resp = await fetch(sitemapUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (resp.ok) {
+                const xml = await resp.text();
+                const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/gi)].map(m => m[1]);
+                const match = urls.find(matchesKeyword);
+                if (match) {
+                    return res.json({ reservation_url: match });
+                }
+            }
+        } catch (_) {
+            // Sitemap not available, continue to page scan
+        }
+
+        // 2. Scan homepage links
+        const b = await getBrowser();
+        page = await b.newPage();
+
+        await page.goto(website, {
+            timeout: 10000,
+            waitUntil: 'domcontentloaded'
+        });
+        await page.waitForTimeout(1500);
+
+        const reservationUrl = await page.evaluate((keywords) => {
+            const links = Array.from(document.querySelectorAll('a[href]'));
+            for (const link of links) {
+                const href = link.href || '';
+                const text = (link.textContent || '').toLowerCase();
+                const lower = href.toLowerCase();
+                const matches = keywords.some(kw => lower.includes(kw) || text.includes(kw));
+                if (matches && href.startsWith('http')) {
+                    return href;
+                }
+            }
+            return null;
+        }, KEYWORDS);
+
+        await page.close();
+
+        res.json({ reservation_url: reservationUrl });
+    } catch (error) {
+        console.error(`Reservation scrape error for ${website}: ${error.message}`);
+        if (page) {
+            await page.close().catch(() => {});
+        }
+        res.json({ reservation_url: null });
+    }
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
