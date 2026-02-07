@@ -36,28 +36,24 @@ export const useRestaurants = () => {
    * Récupère tous les restaurants
    */
   const getAll = async (): Promise<Restaurant[]> => {
-    const { data, error } = await useFetch<Restaurant[]>(`${apiBase}/restaurants`)
-    
-    if (error.value) {
-      console.error('Error fetching restaurants:', error.value)
+    try {
+      return await $fetch<Restaurant[]>(`${apiBase}/restaurants`)
+    } catch (e) {
+      console.error('Error fetching restaurants:', e)
       return []
     }
-    
-    return data.value || []
   }
 
   /**
    * Récupère un restaurant par ID
    */
   const getOne = async (id: string): Promise<Restaurant | null> => {
-    const { data, error } = await useFetch<Restaurant>(`${apiBase}/restaurants/${id}`)
-    
-    if (error.value) {
-      console.error('Error fetching restaurant:', error.value)
+    try {
+      return await $fetch<Restaurant>(`${apiBase}/restaurants/${id}`)
+    } catch (e) {
+      console.error('Error fetching restaurant:', e)
       return null
     }
-    
-    return data.value
   }
 
   return {
