@@ -510,7 +510,25 @@ function scrollToSearch(): void {
 useHead({
   title: 'Restaurants Bordeaux - Les meilleurs restaurants de la ville',
   meta: [
-    { name: 'description', content: 'Découvrez une sélection des meilleurs restaurants de Bordeaux. Notes, avis, et descriptions détaillées.' }
+    { name: 'description', content: 'Découvrez une sélection des meilleurs restaurants de Bordeaux. Notes, avis, et descriptions détaillées.' },
+    // Open Graph
+    { property: 'og:title', content: 'Restaurants Bordeaux - Les meilleurs restaurants de la ville' },
+    { property: 'og:description', content: 'Découvrez une sélection des meilleurs restaurants de Bordeaux. Notes, avis, et descriptions détaillées.' },
+    { property: 'og:image', content: 'https://restaurants-bordeaux.com/background.jpg' },
+    { property: 'og:url', content: 'https://restaurants-bordeaux.com' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'Restaurants Bordeaux' },
+    { property: 'og:locale', content: 'fr_FR' },
+    { property: 'og:locale:alternate', content: 'en_US' },
+    { property: 'og:locale:alternate', content: 'es_ES' },
+    // Twitter Card
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Restaurants Bordeaux - Les meilleurs restaurants de la ville' },
+    { name: 'twitter:description', content: 'Découvrez une sélection des meilleurs restaurants de Bordeaux. Notes, avis, et descriptions détaillées.' },
+    { name: 'twitter:image', content: 'https://restaurants-bordeaux.com/background.jpg' },
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://restaurants-bordeaux.com' }
   ]
 })
 </script>

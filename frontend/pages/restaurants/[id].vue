@@ -717,6 +717,88 @@
         }
       }, { immediate: true })
 
+      // SEO: Dynamic meta tags + Open Graph + JSON-LD
+      const seoTitle = computed(() => {
+        if (!restaurant.value) return 'Restaurant - Bordeaux'
+        return `${restaurant.value.name} - Restaurant Bordeaux`
+      })
+
+      const seoDescription = computed(() => {
+        if (!restaurant.value) return 'Découvrez ce restaurant à Bordeaux'
+        const desc = restaurant.value.description || ''
+        return desc.length > 160 ? desc.substring(0, 157) + '...' : desc
+      })
+
+      const seoImage = computed(() => {
+        if (!restaurant.value?.images?.length) return 'https://restaurants-bordeaux.com/favicon.png'
+        return restaurant.value.images[1] || restaurant.value.images[0]
+      })
+
+      const seoUrl = computed(() => {
+        return `https://restaurants-bordeaux.com/restaurants/${route.params.id}`
+      })
+
+      useHead({
+        title: seoTitle,
+        meta: [
+          { name: 'description', content: seoDescription },
+          // Open Graph
+          { property: 'og:title', content: seoTitle },
+          { property: 'og:description', content: seoDescription },
+          { property: 'og:image', content: seoImage },
+          { property: 'og:url', content: seoUrl },
+          { property: 'og:type', content: 'restaurant' },
+          { property: 'og:site_name', content: 'Restaurants Bordeaux' },
+          // Twitter Card
+          { name: 'twitter:card', content: 'summary_large_image' },
+          { name: 'twitter:title', content: seoTitle },
+          { name: 'twitter:description', content: seoDescription },
+          { name: 'twitter:image', content: seoImage },
+        ],
+        link: [
+          { rel: 'canonical', href: seoUrl }
+        ],
+        script: [
+          {
+            type: 'application/ld+json',
+            innerHTML: computed(() => {
+              if (!restaurant.value) return '{}'
+              const r = restaurant.value
+              const schema: any = {
+                '@context': 'https://schema.org',
+                '@type': 'Restaurant',
+                name: r.name,
+                description: r.description,
+                url: seoUrl.value,
+                image: r.images?.length ? r.images : undefined,
+                address: {
+                  '@type': 'PostalAddress',
+                  streetAddress: r.address,
+                  addressLocality: r.city,
+                  addressCountry: 'FR'
+                },
+                telephone: r.phone || undefined,
+                priceRange: r.price_level !== null && r.price_level !== undefined
+                  ? ['€', '€€', '€€€', '€€€€'][r.price_level] || '€'
+                  : undefined,
+              }
+              if (r.rating) {
+                schema.aggregateRating = {
+                  '@type': 'AggregateRating',
+                  ratingValue: r.rating,
+                  bestRating: 5,
+                  ratingCount: r.rating_count || r.reviews?.length || 1
+                }
+              }
+              if (r.opening_hours?.length) {
+                schema.openingHours = r.opening_hours
+              }
+              return JSON.stringify(schema)
+            })
+          }
+        ]
+      })
+
       const localizedReviews = computed(() => {
         return translatedRestaurant.value?.reviews || []
       })
