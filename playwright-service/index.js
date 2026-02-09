@@ -238,6 +238,9 @@ app.post('/scrape-articles-bordeaux', async (req, res) => {
                 // Must be a real article URL (has a slug after the category)
                 const pathParts = new URL(href).pathname.split('/').filter(Boolean);
                 if (pathParts.length < 3) continue;
+                // Skip category/navigation pages (short slugs without hyphens = not real articles)
+                const slug = pathParts[pathParts.length - 1];
+                if (!slug.includes('-')) continue;
 
                 const text = (link.textContent || '').trim();
                 // Skip very short texts (icons, "Lire la suite", etc.)
@@ -366,7 +369,7 @@ app.post('/scrape-articles-bordeaux', async (req, res) => {
                 title: article.title,
                 url: article.url,
                 excerpt: article.excerpt || null,
-                image: article.image || null,
+                image: article.image ? article.image.replace(/-\d+x\d+(\.\w+)$/, '$1') : null,
                 publishedDate,
                 category,
                 restaurantNames: restaurantNames.slice(0, 3),

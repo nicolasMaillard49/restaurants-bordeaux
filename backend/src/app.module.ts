@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './modules/restaurants.module';
+import { ArticlesModule } from './modules/articles.module';
 import { Restaurant } from './entities/restaurant.entity';
+import { Article } from './entities/article.entity';
 
 @Module({
   imports: [
@@ -21,8 +23,8 @@ import { Restaurant } from './entities/restaurant.entity';
         username: configService.get('DATABASE_USER', 'postgres'),
         password: configService.get('DATABASE_PASSWORD', 'postgres'),
         database: configService.get('DATABASE_NAME', 'restaurants'),
-        entities: [Restaurant],
-        synchronize: configService.get('NODE_ENV') === 'development', // Auto-migration en dev uniquement
+        entities: [Restaurant, Article],
+        synchronize: true, // Auto-sync schema (safe for small projects)
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -30,6 +32,7 @@ import { Restaurant } from './entities/restaurant.entity';
 
     // Modules métier
     RestaurantsModule,
+    ArticlesModule,
   ],
 })
 export class AppModule {}

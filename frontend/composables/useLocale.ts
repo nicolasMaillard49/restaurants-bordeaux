@@ -103,6 +103,13 @@ export const translations = {
       viewMenu: 'Voir le menu',
       formulas: 'Formules'
     },
+    articles: {
+      title: 'Actualités gastronomiques',
+      subtitle: 'Les dernières nouvelles de la scène culinaire bordelaise',
+      readArticle: "Lire l'article",
+      noArticles: 'Aucun article disponible',
+      source: 'Source'
+    },
     types: {
       restaurant: 'Restaurant',
       food: 'Nourriture',
@@ -206,6 +213,13 @@ export const translations = {
       viewMenu: 'View menu',
       formulas: 'Set menus'
     },
+    articles: {
+      title: 'Food news',
+      subtitle: 'The latest news from the Bordeaux culinary scene',
+      readArticle: 'Read article',
+      noArticles: 'No articles available',
+      source: 'Source'
+    },
     types: {
       restaurant: 'Restaurant',
       food: 'Food',
@@ -308,6 +322,13 @@ export const translations = {
       teamChoice: 'Elección del equipo',
       viewMenu: 'Ver el menú',
       formulas: 'Menús'
+    },
+    articles: {
+      title: 'Noticias gastronómicas',
+      subtitle: 'Las últimas noticias de la escena culinaria bordelesa',
+      readArticle: 'Leer artículo',
+      noArticles: 'No hay artículos disponibles',
+      source: 'Fuente'
     },
     types: {
       restaurant: 'Restaurante',
