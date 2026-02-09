@@ -207,6 +207,197 @@ app.post('/scrape-reservation', async (req, res) => {
     }
 });
 
+// Scrape articles from bougerabordeaux.com
+app.post('/scrape-articles-bordeaux', async (req, res) => {
+    const { limit = 10 } = req.body;
+
+    let page = null;
+    try {
+        const b = await getBrowser();
+        page = await b.newPage();
+
+        await page.goto('https://www.bougerabordeaux.com/bordeaux/food/restaurants/', {
+            timeout: 30000,
+            waitUntil: 'domcontentloaded'
+        });
+        await page.waitForTimeout(2000);
+
+        const rawArticles = await page.evaluate((maxArticles) => {
+            const articles = [];
+            // WordPress structure: look for article links with images
+            const allLinks = Array.from(document.querySelectorAll('a[href*="/food/"], a[href*="/actu/"]'));
+            const seen = new Set();
+            const titleLinks = [];
+
+            // Find links that contain article titles (not "Lire la suite", not images-only)
+            for (const link of allLinks) {
+                const href = link.href;
+                if (!href || seen.has(href)) continue;
+                // Skip non-article URLs
+                if (href.includes('/category/') || href.includes('/tag/') || href.includes('/page/')) continue;
+                // Must be a real article URL (has a slug after the category)
+                const pathParts = new URL(href).pathname.split('/').filter(Boolean);
+                if (pathParts.length < 3) continue;
+                // Skip category/navigation pages (short slugs without hyphens = not real articles)
+                const slug = pathParts[pathParts.length - 1];
+                if (!slug.includes('-')) continue;
+
+                const text = (link.textContent || '').trim();
+                // Skip very short texts (icons, "Lire la suite", etc.)
+                if (text.length < 15 || text.includes('Lire la suite')) continue;
+
+                seen.add(href);
+                titleLinks.push({ href, title: text, element: link });
+            }
+
+            for (const { href, title, element } of titleLinks.slice(0, maxArticles)) {
+                // Try to find associated image nearby
+                let image = null;
+                // Look for sibling or parent container with an image linking to the same URL
+                const parent = element.closest('div') || element.parentElement;
+                if (parent) {
+                    const parentContainer = parent.parentElement;
+                    if (parentContainer) {
+                        const img = parentContainer.querySelector('img');
+                        if (img) {
+                            image = img.src || img.dataset.src || img.dataset.lazySrc || null;
+                        }
+                    }
+                }
+
+                // Look for excerpt text nearby
+                let excerpt = '';
+                if (parent) {
+                    const parentContainer = parent.parentElement;
+                    if (parentContainer) {
+                        const paragraphs = parentContainer.querySelectorAll('p');
+                        for (const p of paragraphs) {
+                            const pText = p.textContent.trim();
+                            if (pText.length > 30 && !pText.includes('Lire la suite')) {
+                                excerpt = pText;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Look for date text nearby
+                let dateText = '';
+                if (parent) {
+                    const parentContainer = parent.parentElement;
+                    if (parentContainer) {
+                        const spans = parentContainer.querySelectorAll('span, time, .date, .entry-date');
+                        for (const span of spans) {
+                            const sText = span.textContent.trim();
+                            if (sText.match(/il y a|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|\d{1,2}\/\d{1,2}/i)) {
+                                dateText = sText;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                articles.push({
+                    title,
+                    url: href,
+                    excerpt,
+                    dateText,
+                    image
+                });
+            }
+
+            return articles;
+        }, Math.min(limit, 20));
+
+        await page.close();
+
+        // Post-processing
+        const now = new Date();
+        const articles = rawArticles.map(article => {
+            // Generate ID from URL slug
+            const urlParts = new URL(article.url).pathname.split('/').filter(Boolean);
+            const slug = urlParts[urlParts.length - 1] || '';
+            const id = slug;
+
+            // Parse relative date
+            let publishedDate = null;
+            if (article.dateText) {
+                const relMatch = article.dateText.match(/il y a (\d+)\s*(jour|jours|semaine|semaines|mois|heure|heures|minute|minutes)/i);
+                if (relMatch) {
+                    const amount = parseInt(relMatch[1]);
+                    const unit = relMatch[2].toLowerCase();
+                    const date = new Date(now);
+                    if (unit.startsWith('jour')) date.setDate(date.getDate() - amount);
+                    else if (unit.startsWith('semaine')) date.setDate(date.getDate() - amount * 7);
+                    else if (unit.startsWith('mois')) date.setMonth(date.getMonth() - amount);
+                    else if (unit.startsWith('heure')) date.setHours(date.getHours() - amount);
+                    else if (unit.startsWith('minute')) date.setMinutes(date.getMinutes() - amount);
+                    publishedDate = date.toISOString();
+                } else {
+                    // Try absolute date parsing (e.g. "5 janvier 2026")
+                    const months = { janvier: 0, février: 1, mars: 2, avril: 3, mai: 4, juin: 5, juillet: 6, août: 7, septembre: 8, octobre: 9, novembre: 10, décembre: 11 };
+                    const absMatch = article.dateText.match(/(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})/i);
+                    if (absMatch) {
+                        publishedDate = new Date(parseInt(absMatch[3]), months[absMatch[2].toLowerCase()], parseInt(absMatch[1])).toISOString();
+                    }
+                }
+            }
+
+            // Categorize based on title keywords
+            const titleLower = article.title.toLowerCase();
+            let category = 'actualité';
+            if (/ouvre|ouverture|débarque|nouveau|nouvelle|s'installe|lance|arrive/.test(titleLower)) category = 'ouverture';
+            else if (/ferme|fermeture|fermé/.test(titleLower)) category = 'fermeture';
+            else if (/top|meilleur|classement|brille|palmarès/.test(titleLower)) category = 'classement';
+
+            // Extract restaurant names from title
+            const restaurantNames = [];
+            // Pattern: "Nom :" or "Nom ," at start or after specific words
+            const colonMatch = article.title.match(/^([A-ZÀ-Ü][a-zà-ü''\-]+(?:\s+[A-ZÀ-Ü][a-zà-ü''\-]+)*)\s*:/);
+            if (colonMatch) restaurantNames.push(colonMatch[1]);
+            // Pattern: known formats like "chez X", "Le/La X"
+            const namedMatch = article.title.match(/(?:avec|chez|de)\s+((?:Le |La |L'|Les )?[A-ZÀ-Ü][a-zà-ü''\-]+(?:\s+[A-ZÀ-Ü][a-zà-ü''\-]+)*)/g);
+            if (namedMatch) {
+                namedMatch.forEach(m => {
+                    const name = m.replace(/^(?:avec|chez|de)\s+/i, '').trim();
+                    if (name.length > 2 && !restaurantNames.includes(name)) restaurantNames.push(name);
+                });
+            }
+
+            return {
+                id,
+                title: article.title,
+                url: article.url,
+                excerpt: article.excerpt || null,
+                image: article.image ? article.image.replace(/-\d+x\d+(\.\w+)$/, '$1') : null,
+                publishedDate,
+                category,
+                restaurantNames: restaurantNames.slice(0, 3),
+                scrapedAt: now.toISOString()
+            };
+        });
+
+        res.json({
+            totalArticles: articles.length,
+            processedAt: now.toISOString(),
+            source: 'bougerabordeaux.com',
+            articles
+        });
+    } catch (error) {
+        console.error(`Articles scrape error: ${error.message}`);
+        if (page) {
+            await page.close().catch(() => {});
+        }
+        res.json({
+            totalArticles: 0,
+            processedAt: new Date().toISOString(),
+            source: 'bougerabordeaux.com',
+            articles: [],
+            error: error.message
+        });
+    }
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });

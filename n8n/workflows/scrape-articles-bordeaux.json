@@ -1,0 +1,216 @@
+{
+  "name": "Scrape Articles BougeraBordeaux",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-cron",
+      "name": "Daily 8h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://playwright:3002/scrape-articles-bordeaux",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"limit\": 15 }",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-scrape",
+      "name": "Scrape Articles",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-check",
+              "leftValue": "={{ $json.totalArticles }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-articles",
+      "name": "Has Articles?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [750, 400]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "id": "split-articles",
+      "name": "Split Articles",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1000, 350]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{ $json.excerpt }}"
+            },
+            {
+              "name": "image",
+              "value": "={{ $json.image }}"
+            },
+            {
+              "name": "publishedDate",
+              "value": "={{ $json.publishedDate }}"
+            },
+            {
+              "name": "category",
+              "value": "={{ $json.category }}"
+            },
+            {
+              "name": "restaurantNames",
+              "value": "={{ JSON.stringify($json.restaurantNames) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-fields",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1250, 350]
+    },
+    {
+      "parameters": {
+        "action": "log",
+        "logMessage": "=No articles found or scraping error"
+      },
+      "id": "no-articles",
+      "name": "No Articles",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1000, 500]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Scrape Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 8h": {
+      "main": [
+        [
+          {
+            "node": "Scrape Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Articles": {
+      "main": [
+        [
+          {
+            "node": "Has Articles?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Articles?": {
+      "main": [
+        [
+          {
+            "node": "Split Articles",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Articles": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "scraping"
+    }
+  ]
+}

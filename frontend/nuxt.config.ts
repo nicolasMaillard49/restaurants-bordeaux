@@ -1,9 +1,5 @@
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui', '@nuxtjs/sitemap'],
-
-  site: {
-    url: 'https://restaurants-bordeaux.com'
-  },
+  modules: ['@nuxt/ui'],
 
   devtools: { enabled: true },
 
