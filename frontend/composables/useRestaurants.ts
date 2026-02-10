@@ -19,6 +19,7 @@ export interface Restaurant {
   google_maps_url: string | null
   reservation_url: string | null
   types: string[] | null
+  cuisine_origin: string | null
   reviews: Review[] | null
   images: string[]
   source: string
