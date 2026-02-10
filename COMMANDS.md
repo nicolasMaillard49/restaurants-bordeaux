@@ -4,7 +4,7 @@
 //mise en prod
 docker compose -f docker-compose.prod.yml --env-file .env up -d --build frontend backend
 
-
+ssh deploy@51.255.200.169
 
 ```bash
 # Lancer en dev
