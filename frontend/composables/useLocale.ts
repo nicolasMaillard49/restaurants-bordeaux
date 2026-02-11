@@ -77,6 +77,7 @@ export const translations = {
       emptyTitle: 'Aucun restaurant trouvé',
       emptyDescription: 'Essayez de modifier vos filtres ou votre recherche',
       viewMore: 'Voir plus',
+      viewLess: 'Voir moins',
       footerTagline: 'Votre guide gastronomique bordelais',
       rights: 'Tous droits réservés',
       restaurantsCount: 'restaurant'
@@ -189,6 +190,7 @@ export const translations = {
       emptyTitle: 'No restaurants found',
       emptyDescription: 'Try adjusting your filters or search',
       viewMore: 'View more',
+      viewLess: 'View less',
       footerTagline: 'Your Bordeaux food guide',
       rights: 'All rights reserved',
       restaurantsCount: 'restaurant'
@@ -301,6 +303,7 @@ export const translations = {
       emptyTitle: 'No se encontraron restaurantes',
       emptyDescription: 'Prueba a ajustar tus filtros o búsqueda',
       viewMore: 'Ver más',
+      viewLess: 'Ver menos',
       footerTagline: 'Tu guía gastronómica de Burdeos',
       rights: 'Todos los derechos reservados',
       restaurantsCount: 'restaurante'

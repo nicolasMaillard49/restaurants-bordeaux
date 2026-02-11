@@ -18,6 +18,7 @@ export interface Restaurant {
   price_level: number | null
   google_maps_url: string | null
   reservation_url: string | null
+  menu_url: string | null
   types: string[] | null
   cuisine_origin: string | null
   reviews: Review[] | null

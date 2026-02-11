@@ -62,6 +62,9 @@ export class Restaurant {
   @Column({ type: 'varchar', length: 500, nullable: true })
   reservation_url: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  menu_url: string;
+
   @Column({ type: 'jsonb', nullable: true })
   types: string[];
 
