@@ -178,10 +178,10 @@
             </div>
 
             <!-- Row 2: Menu (featured) + Reservation -->
-            <div v-if="isFeatured || restaurant.reservation_url" class="flex gap-3 sm:gap-4 overflow-x-auto p-1 pb-3 scrollbar-hide">
+            <div v-if="restaurant.menu_url || isFeatured || restaurant.reservation_url" class="flex gap-3 sm:gap-4 overflow-x-auto p-1 pb-3 scrollbar-hide">
               <ActionCard
-                v-if="isFeatured"
-                :href="featuredData.menuUrl"
+                v-if="restaurant.menu_url || isFeatured"
+                :href="restaurant.menu_url || featuredData.menuUrl"
                 icon="i-heroicons-book-open"
                 label="Menu"
                 :value="t.restaurant.viewMenu"

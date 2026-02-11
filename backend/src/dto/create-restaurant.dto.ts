@@ -73,6 +73,10 @@ export class CreateRestaurantDto {
   @IsOptional()
   reservation_url?: string;
 
+  @IsUrl()
+  @IsOptional()
+  menu_url?: string;
+
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
