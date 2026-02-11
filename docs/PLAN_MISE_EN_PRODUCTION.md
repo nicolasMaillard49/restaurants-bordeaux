@@ -154,8 +154,9 @@ dig restaurants-bordeaux.fr +short
 
 | Variable | Valeur dev (actuelle) | Action pour la prod |
 |----------|-----------------------|---------------------|
-| `POSTGRES_PASSWORD` | `postgres` | Générer un mot de passe fort (32+ caractères) |
-| `API_SECRET_KEY` | vide ou `nicolas123` | Générer une clé API forte (64 caractères) |
+| `POSTGRES_PASSWORD` | `postgres` | /1bCfzTo0AuYMHw6DUCEFlWi29Qzbcn2LLUJfTeqy5A= |
+| `API_SECRET_KEY` | vide ou `nicolas123` |  a9a4a11375832862123996a4bec34d4792553d0843f48cd35c485abb61ef659b |
+`N8N` | iSadGfrVoKXCTd98PWbfWQ==
 | `GROQ_API_KEY` | Clé en clair dans .env | Vérifier qu'elle n'est pas dans le repo git |
 | Clé Google Maps | En dur dans le workflow n8n | Restreindre par IP serveur dans la console Google |
 | Clé Groq | En dur dans le workflow n8n | Idem, utiliser les credentials n8n |

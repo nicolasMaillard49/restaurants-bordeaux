@@ -98,7 +98,17 @@ export const translations = {
       lastUpdate: 'Dernière mise à jour',
       cuisineOrigin: 'Origine de la cuisine',
       reservation: 'Réservation',
-      bookTable: 'Réserver une table'
+      bookTable: 'Réserver une table',
+      teamChoice: "Choix de l'équipe",
+      viewMenu: 'Voir le menu',
+      formulas: 'Formules'
+    },
+    articles: {
+      title: 'Actualités gastronomiques',
+      subtitle: 'Les dernières nouvelles de la scène culinaire bordelaise',
+      readArticle: "Lire l'article",
+      noArticles: 'Aucun article disponible',
+      source: 'Source'
     },
     types: {
       restaurant: 'Restaurant',
@@ -198,7 +208,17 @@ export const translations = {
       lastUpdate: 'Last update',
       cuisineOrigin: 'Cuisine origin',
       reservation: 'Reservation',
-      bookTable: 'Book a table'
+      bookTable: 'Book a table',
+      teamChoice: "Team's choice",
+      viewMenu: 'View menu',
+      formulas: 'Set menus'
+    },
+    articles: {
+      title: 'Food news',
+      subtitle: 'The latest news from the Bordeaux culinary scene',
+      readArticle: 'Read article',
+      noArticles: 'No articles available',
+      source: 'Source'
     },
     types: {
       restaurant: 'Restaurant',
@@ -298,7 +318,17 @@ export const translations = {
       lastUpdate: 'Última actualización',
       cuisineOrigin: 'Origen de la cocina',
       reservation: 'Reserva',
-      bookTable: 'Reservar una mesa'
+      bookTable: 'Reservar una mesa',
+      teamChoice: 'Elección del equipo',
+      viewMenu: 'Ver el menú',
+      formulas: 'Menús'
+    },
+    articles: {
+      title: 'Noticias gastronómicas',
+      subtitle: 'Las últimas noticias de la escena culinaria bordelesa',
+      readArticle: 'Leer artículo',
+      noArticles: 'No hay artículos disponibles',
+      source: 'Fuente'
     },
     types: {
       restaurant: 'Restaurante',
