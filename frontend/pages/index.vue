@@ -369,12 +369,48 @@
           <!-- Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <RestaurantCard
-              v-for="(restaurant, index) in sortedRestaurants"
+              v-for="(restaurant, index) in visibleRestaurants"
               :key="restaurant.id"
               :restaurant="restaurant"
               :is-featured="isFeatured(restaurant)"
               :animation-delay="index * 50"
             />
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="sortedRestaurants.length > ITEMS_PER_PAGE" class="mt-10 sm:mt-14">
+            <!-- Progress bar -->
+            <div class="max-w-xs mx-auto mb-5">
+              <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-bordeaux-700 rounded-full transition-all duration-500 ease-out"
+                  :style="{ width: Math.min((visibleCount / sortedRestaurants.length) * 100, 100) + '%' }"
+                ></div>
+              </div>
+              <p class="text-center text-xs text-[#999] mt-2">
+                {{ Math.min(visibleCount, sortedRestaurants.length) }} sur {{ sortedRestaurants.length }}
+              </p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-center gap-3">
+              <button
+                v-if="hasMore"
+                @click="loadMore"
+                class="group flex items-center gap-2 px-6 sm:px-8 py-3 bg-bordeaux-700 text-white rounded-full font-medium cursor-pointer hover:bg-bordeaux-700/90 shadow-lg shadow-bordeaux-700/20 hover:shadow-xl hover:shadow-bordeaux-700/30 transition-all duration-200 active:scale-[0.97] min-h-[44px]"
+              >
+                <span>{{ t.ui.viewMore }}</span>
+                <UIcon name="i-heroicons-chevron-down" class="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              </button>
+              <button
+                v-if="visibleCount > ITEMS_PER_PAGE"
+                @click="showLess"
+                class="group flex items-center gap-2 px-6 sm:px-8 py-3 bg-white text-[#555] border border-gray-200 rounded-full font-medium cursor-pointer hover:bg-bordeaux-700/5 hover:border-bordeaux-700/20 transition-all duration-200 active:scale-[0.97] min-h-[44px]"
+              >
+                <UIcon name="i-heroicons-chevron-up" class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                <span>{{ t.ui.viewLess }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -541,6 +577,10 @@ const sortBy = ref('rating')
 const selectedCuisineOrigin = ref('')
 const selectedType = ref('')
 
+// Pagination
+const ITEMS_PER_PAGE = 6
+const visibleCount = ref(ITEMS_PER_PAGE)
+
 // Scroll to top
 const showScrollTop = ref(false)
 
@@ -658,6 +698,24 @@ const sortedRestaurants = computed(() => {
     sorted.unshift(featured)
   }
   return sorted
+})
+
+const visibleRestaurants = computed(() => sortedRestaurants.value.slice(0, visibleCount.value))
+const hasMore = computed(() => visibleCount.value < sortedRestaurants.value.length)
+const remainingCount = computed(() => Math.min(ITEMS_PER_PAGE, sortedRestaurants.value.length - visibleCount.value))
+
+function loadMore() {
+  visibleCount.value += ITEMS_PER_PAGE
+}
+
+function showLess() {
+  visibleCount.value = ITEMS_PER_PAGE
+  document.getElementById('restaurants')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// Reset pagination when filters change
+watch([searchQuery, selectedFilter, selectedCuisineOrigin, selectedType, sortBy], () => {
+  visibleCount.value = ITEMS_PER_PAGE
 })
 
 const averageRating = computed(() => {
