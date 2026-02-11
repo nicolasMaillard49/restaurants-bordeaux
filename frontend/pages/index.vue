@@ -178,22 +178,25 @@
             >
               {{ filter.label }}
             </button>
+          </div>
 
+          <!-- Cuisine & Type Dropdowns -->
+          <div class="grid grid-cols-2 sm:flex gap-2">
             <!-- Cuisine Origin Filter -->
             <div v-if="availableCuisineOrigins.length > 0" class="relative" ref="cuisineDropdownRef">
               <button
                 @click="cuisineDropdownOpen = !cuisineDropdownOpen"
                 :class="[
-                  'flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer whitespace-nowrap text-sm sm:text-base min-h-[44px]',
+                  'flex items-center justify-between gap-2 w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer text-sm sm:text-base min-h-[44px]',
                   selectedCuisineOrigin
                     ? 'bg-bordeaux-700 text-white shadow-lg shadow-bordeaux-700/20'
                     : 'bg-white text-[#555] hover:bg-bordeaux-700/5 border border-gray-200'
                 ]"
               >
-                <span>{{ selectedCuisineOrigin || t.filters.allCuisines }}</span>
+                <span class="truncate">{{ selectedCuisineOrigin || t.filters.allCuisines }}</span>
                 <UIcon
                   name="i-heroicons-chevron-down"
-                  :class="['w-4 h-4 transition-transform duration-200', cuisineDropdownOpen ? 'rotate-180' : '', selectedCuisineOrigin ? 'text-white/70' : 'text-[#999]']"
+                  :class="['w-4 h-4 shrink-0 transition-transform duration-200', cuisineDropdownOpen ? 'rotate-180' : '', selectedCuisineOrigin ? 'text-white/70' : 'text-[#999]']"
                 />
               </button>
               <Transition
@@ -206,7 +209,7 @@
               >
                 <div
                   v-if="cuisineDropdownOpen"
-                  class="absolute top-full left-0 mt-2 w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full left-0 mt-2 w-50 max-h-[25vh] overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50 dropdown-scroll"
                 >
                   <button
                     @click="selectedCuisineOrigin = ''; cuisineDropdownOpen = false"
@@ -237,16 +240,16 @@
               <button
                 @click="typeDropdownOpen = !typeDropdownOpen"
                 :class="[
-                  'flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer whitespace-nowrap text-sm sm:text-base min-h-[44px]',
+                  'flex items-center justify-between gap-2 w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer text-sm sm:text-base min-h-[44px]',
                   selectedType
                     ? 'bg-bordeaux-700 text-white shadow-lg shadow-bordeaux-700/20'
                     : 'bg-white text-[#555] hover:bg-bordeaux-700/5 border border-gray-200'
                 ]"
               >
-                <span>{{ selectedType ? translateType(selectedType) : t.filters.allTypes }}</span>
+                <span class="truncate">{{ selectedType ? translateType(selectedType) : t.filters.allTypes }}</span>
                 <UIcon
                   name="i-heroicons-chevron-down"
-                  :class="['w-4 h-4 transition-transform duration-200', typeDropdownOpen ? 'rotate-180' : '', selectedType ? 'text-white/70' : 'text-[#999]']"
+                  :class="['w-4 h-4 shrink-0 transition-transform duration-200', typeDropdownOpen ? 'rotate-180' : '', selectedType ? 'text-white/70' : 'text-[#999]']"
                 />
               </button>
               <Transition
@@ -259,7 +262,7 @@
               >
                 <div
                   v-if="typeDropdownOpen"
-                  class="absolute top-full left-0 mt-2 w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full left-0 mt-2 w-50 max-h-[25vh] overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50 dropdown-scroll"
                 >
                   <button
                     @click="selectedType = ''; typeDropdownOpen = false"
@@ -345,7 +348,7 @@
               >
                 <div
                   v-if="sortDropdownOpen"
-                  class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50 dropdown-scroll"
                 >
                   <button
                     v-for="option in sortOptions"
@@ -485,6 +488,25 @@
       :restaurant-count="restaurants?.length || 0"
       :average-rating="averageRating"
     />
+
+    <!-- Scroll to Top Button -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="opacity-0 translate-y-4 scale-95"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 translate-y-4 scale-95"
+    >
+      <button
+        v-if="showScrollTop"
+        @click="scrollToTop"
+        class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-bordeaux-700 text-white rounded-full shadow-lg shadow-bordeaux-700/30 flex items-center justify-center cursor-pointer hover:bg-bordeaux-700/90 hover:shadow-xl hover:shadow-bordeaux-700/40 transition-all duration-200 active:scale-95"
+        aria-label="Retour en haut"
+      >
+        <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -519,6 +541,17 @@ const sortBy = ref('rating')
 const selectedCuisineOrigin = ref('')
 const selectedType = ref('')
 
+// Scroll to top
+const showScrollTop = ref(false)
+
+function handleScroll() {
+  showScrollTop.value = window.scrollY > window.innerHeight / 2
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 // Dropdown open states
 const cuisineDropdownOpen = ref(false)
 const typeDropdownOpen = ref(false)
@@ -544,10 +577,12 @@ function handleClickOutside(e: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('scroll', handleScroll)
 })
 
 const availableCuisineOrigins = computed(() =>
@@ -731,6 +766,26 @@ article {
   article {
     animation: none;
   }
+}
+
+.dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #722F37 #f3f4f6;
+}
+.dropdown-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-scroll::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 9999px;
+  margin: 8px 0;
+}
+.dropdown-scroll::-webkit-scrollbar-thumb {
+  background: #722F37;
+  border-radius: 9999px;
+}
+.dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: #5a252c;
 }
 
 .scrollbar-hide {
