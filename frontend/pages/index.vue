@@ -206,7 +206,7 @@
               >
                 <div
                   v-if="cuisineDropdownOpen"
-                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-0 sm:right-auto mt-2 sm:w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full left-0 mt-2 w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
                 >
                   <button
                     @click="selectedCuisineOrigin = ''; cuisineDropdownOpen = false"
@@ -259,7 +259,7 @@
               >
                 <div
                   v-if="typeDropdownOpen"
-                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-0 sm:right-auto mt-2 sm:w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full left-0 mt-2 w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
                 >
                   <button
                     @click="selectedType = ''; typeDropdownOpen = false"
@@ -345,7 +345,7 @@
               >
                 <div
                   v-if="sortDropdownOpen"
-                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-auto sm:right-0 mt-2 sm:w-48 bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                  class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
                 >
                   <button
                     v-for="option in sortOptions"
