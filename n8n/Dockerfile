@@ -1,4 +1,6 @@
 FROM n8nio/n8n:latest
 
-# Use the default n8n image without modifications
+# Install cheerio for HTML parsing in n8n Code nodes
+RUN npm install cheerio
+
 # Playwright runs in a separate service (playwright-service)

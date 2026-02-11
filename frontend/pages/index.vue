@@ -94,22 +94,22 @@
       <div class="relative z-10 pb-4 sm:pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
           <div v-if="!pending && restaurants" class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-            <div class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-default">
+            <div @click="scrollToRestaurants" class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer">
               <div class="text-2xl sm:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{ restaurants.length }}</div>
               <div class="text-white/60 text-xs sm:text-sm">{{ t.stats.restaurants }}</div>
             </div>
-            <div class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-default">
+            <div @click="scrollToRestaurants" class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer">
               <div class="flex items-center gap-1.5 sm:gap-2">
                 <span class="text-2xl sm:text-3xl font-bold text-white">{{ averageRating }}</span>
                 <UIcon name="i-heroicons-star-solid" class="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
               </div>
               <div class="text-white/60 text-xs sm:text-sm">{{ t.stats.avgRating }}</div>
             </div>
-            <div class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-default">
+            <div @click="scrollToRestaurants" class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer">
               <div class="text-2xl sm:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{ topRatedCount }}</div>
               <div class="text-white/60 text-xs sm:text-sm">{{ t.stats.topRated }}</div>
             </div>
-            <div class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-default">
+            <div @click="scrollToRestaurants" class="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer">
               <div class="text-2xl sm:text-3xl font-bold text-gold mb-0.5 sm:mb-1">100%</div>
               <div class="text-white/60 text-xs sm:text-sm">{{ t.stats.verified }}</div>
             </div>
@@ -164,7 +164,7 @@
           </div>
 
           <!-- Filters -->
-          <div class="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+          <div class="flex gap-2 flex-wrap">
             <button
               v-for="filter in filters"
               :key="filter.value"
@@ -178,6 +178,112 @@
             >
               {{ filter.label }}
             </button>
+
+            <!-- Cuisine Origin Filter -->
+            <div v-if="availableCuisineOrigins.length > 0" class="relative" ref="cuisineDropdownRef">
+              <button
+                @click="cuisineDropdownOpen = !cuisineDropdownOpen"
+                :class="[
+                  'flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer whitespace-nowrap text-sm sm:text-base min-h-[44px]',
+                  selectedCuisineOrigin
+                    ? 'bg-bordeaux-700 text-white shadow-lg shadow-bordeaux-700/20'
+                    : 'bg-white text-[#555] hover:bg-bordeaux-700/5 border border-gray-200'
+                ]"
+              >
+                <span>{{ selectedCuisineOrigin || t.filters.allCuisines }}</span>
+                <UIcon
+                  name="i-heroicons-chevron-down"
+                  :class="['w-4 h-4 transition-transform duration-200', cuisineDropdownOpen ? 'rotate-180' : '', selectedCuisineOrigin ? 'text-white/70' : 'text-[#999]']"
+                />
+              </button>
+              <Transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+              >
+                <div
+                  v-if="cuisineDropdownOpen"
+                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-0 sm:right-auto mt-2 sm:w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                >
+                  <button
+                    @click="selectedCuisineOrigin = ''; cuisineDropdownOpen = false"
+                    :class="[
+                      'w-full text-left px-4 py-3 sm:py-2.5 text-sm transition-colors duration-150 cursor-pointer',
+                      !selectedCuisineOrigin ? 'bg-bordeaux-700/10 text-bordeaux-700 font-medium' : 'text-[#555] hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ t.filters.allCuisines }}
+                  </button>
+                  <button
+                    v-for="origin in availableCuisineOrigins"
+                    :key="origin"
+                    @click="selectedCuisineOrigin = origin; cuisineDropdownOpen = false"
+                    :class="[
+                      'w-full text-left px-4 py-3 sm:py-2.5 text-sm transition-colors duration-150 cursor-pointer',
+                      selectedCuisineOrigin === origin ? 'bg-bordeaux-700/10 text-bordeaux-700 font-medium' : 'text-[#555] hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ origin }}
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- Type Filter -->
+            <div v-if="availableTypes.length > 0" class="relative" ref="typeDropdownRef">
+              <button
+                @click="typeDropdownOpen = !typeDropdownOpen"
+                :class="[
+                  'flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer whitespace-nowrap text-sm sm:text-base min-h-[44px]',
+                  selectedType
+                    ? 'bg-bordeaux-700 text-white shadow-lg shadow-bordeaux-700/20'
+                    : 'bg-white text-[#555] hover:bg-bordeaux-700/5 border border-gray-200'
+                ]"
+              >
+                <span>{{ selectedType ? translateType(selectedType) : t.filters.allTypes }}</span>
+                <UIcon
+                  name="i-heroicons-chevron-down"
+                  :class="['w-4 h-4 transition-transform duration-200', typeDropdownOpen ? 'rotate-180' : '', selectedType ? 'text-white/70' : 'text-[#999]']"
+                />
+              </button>
+              <Transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+              >
+                <div
+                  v-if="typeDropdownOpen"
+                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-0 sm:right-auto mt-2 sm:w-56 max-h-64 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                >
+                  <button
+                    @click="selectedType = ''; typeDropdownOpen = false"
+                    :class="[
+                      'w-full text-left px-4 py-3 sm:py-2.5 text-sm transition-colors duration-150 cursor-pointer',
+                      !selectedType ? 'bg-bordeaux-700/10 text-bordeaux-700 font-medium' : 'text-[#555] hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ t.filters.allTypes }}
+                  </button>
+                  <button
+                    v-for="type in availableTypes"
+                    :key="type"
+                    @click="selectedType = type; typeDropdownOpen = false"
+                    :class="[
+                      'w-full text-left px-4 py-3 sm:py-2.5 text-sm transition-colors duration-150 cursor-pointer',
+                      selectedType === type ? 'bg-bordeaux-700/10 text-bordeaux-700 font-medium' : 'text-[#555] hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ translateType(type) }}
+                  </button>
+                </div>
+              </Transition>
+            </div>
           </div>
         </div>
 
@@ -217,16 +323,43 @@
               <span class="text-[#666] ml-1.5 sm:ml-2 text-sm sm:text-base">{{ t.ui.restaurantsCount }}{{ filteredRestaurants.length > 1 ? 's' : '' }}</span>
             </h3>
 
-            <div class="relative">
-              <select
-                v-model="sortBy"
-                class="appearance-none pl-3 sm:pl-4 pr-9 sm:pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-[#555] cursor-pointer focus:outline-none focus:ring-2 focus:ring-bordeaux-700/20 focus:border-bordeaux-700 text-sm sm:text-base min-h-[44px]"
+            <div class="relative" ref="sortDropdownRef">
+              <button
+                @click="sortDropdownOpen = !sortDropdownOpen"
+                class="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-xl font-medium text-[#555] cursor-pointer transition-all duration-200 hover:bg-bordeaux-700/5 text-sm sm:text-base min-h-[44px] whitespace-nowrap"
               >
-                <option value="rating">{{ t.sort.rating }}</option>
-                <option value="name">{{ t.sort.name }}</option>
-                <option value="recent">{{ t.sort.recent }}</option>
-              </select>
-              <UIcon name="i-heroicons-chevron-down" class="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-[#999] pointer-events-none" />
+                <UIcon name="i-heroicons-arrows-up-down" class="w-4 h-4 text-[#999]" />
+                <span>{{ sortOptions.find(o => o.value === sortBy)?.label }}</span>
+                <UIcon
+                  name="i-heroicons-chevron-down"
+                  :class="['w-4 h-4 text-[#999] transition-transform duration-200', sortDropdownOpen ? 'rotate-180' : '']"
+                />
+              </button>
+              <Transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+              >
+                <div
+                  v-if="sortDropdownOpen"
+                  class="fixed sm:absolute top-auto sm:top-full left-4 right-4 sm:left-auto sm:right-0 mt-2 sm:w-48 bg-white rounded-xl border border-gray-200 shadow-xl shadow-black/10 z-50"
+                >
+                  <button
+                    v-for="option in sortOptions"
+                    :key="option.value"
+                    @click="sortBy = option.value; sortDropdownOpen = false"
+                    :class="[
+                      'w-full text-left px-4 py-3 sm:py-2.5 text-sm transition-colors duration-150 cursor-pointer',
+                      sortBy === option.value ? 'bg-bordeaux-700/10 text-bordeaux-700 font-medium' : 'text-[#555] hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ option.label }}
+                  </button>
+                </div>
+              </Transition>
             </div>
           </div>
 
@@ -361,7 +494,7 @@ import { isRestaurantOpenNow } from '~/composables/useOpeningHours'
 
 const { getAll } = useRestaurants()
 const { getAll: getAllArticles } = useArticles()
-const { t } = useTranslations()
+const { t, translateType } = useTranslations()
 
 const FEATURED_NAME = 'Restaurant La Rencontre'
 const isFeatured = (r: Restaurant) => r.name?.trim() === FEATURED_NAME
@@ -383,11 +516,57 @@ const { data: articles } = await useAsyncData(
 const searchQuery = ref('')
 const selectedFilter = ref('all')
 const sortBy = ref('rating')
+const selectedCuisineOrigin = ref('')
+const selectedType = ref('')
+
+// Dropdown open states
+const cuisineDropdownOpen = ref(false)
+const typeDropdownOpen = ref(false)
+const sortDropdownOpen = ref(false)
+
+// Dropdown refs for click-outside
+const cuisineDropdownRef = ref<HTMLElement>()
+const typeDropdownRef = ref<HTMLElement>()
+const sortDropdownRef = ref<HTMLElement>()
+
+function handleClickOutside(e: MouseEvent) {
+  const target = e.target as Node
+  if (cuisineDropdownRef.value && !cuisineDropdownRef.value.contains(target)) {
+    cuisineDropdownOpen.value = false
+  }
+  if (typeDropdownRef.value && !typeDropdownRef.value.contains(target)) {
+    typeDropdownOpen.value = false
+  }
+  if (sortDropdownRef.value && !sortDropdownRef.value.contains(target)) {
+    sortDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+const availableCuisineOrigins = computed(() =>
+  [...new Set(restaurants.value?.map(r => r.cuisine_origin).filter(Boolean))].sort()
+)
+const availableTypes = computed(() =>
+  [...new Set(restaurants.value?.flatMap(r => r.types || []).filter(t => !['establishment', 'point_of_interest', 'food'].includes(t)))].sort()
+)
 
 const filters = computed(() => [
   { label: t.value.filters.all, value: 'all' },
   { label: t.value.filters.openNow, value: 'open' },
   { label: t.value.filters.topRated, value: 'top' },
+])
+
+const sortOptions = computed(() => [
+  { label: t.value.sort.rating, value: 'rating' },
+  { label: t.value.sort.name, value: 'name' },
+  { label: t.value.sort.recent, value: 'recent' },
 ])
 
 function toRating(restaurant: Restaurant): number {
@@ -404,7 +583,9 @@ const filteredRestaurants = computed(() => {
     filtered = filtered.filter((r) =>
       r.name?.toLowerCase().includes(query) ||
       r.description?.toLowerCase().includes(query) ||
-      r.address?.toLowerCase().includes(query)
+      r.address?.toLowerCase().includes(query) ||
+      r.cuisine_origin?.toLowerCase().includes(query) ||
+      r.types?.some(t => t.toLowerCase().includes(query) || translateType(t).toLowerCase().includes(query))
     )
   }
 
@@ -412,6 +593,13 @@ const filteredRestaurants = computed(() => {
     filtered = filtered.filter((r) => isRestaurantOpenNow(r))
   } else if (selectedFilter.value === 'top') {
     filtered = filtered.filter((r) => toRating(r) >= 4.5)
+  }
+
+  if (selectedCuisineOrigin.value) {
+    filtered = filtered.filter(r => r.cuisine_origin === selectedCuisineOrigin.value)
+  }
+  if (selectedType.value) {
+    filtered = filtered.filter(r => r.types?.includes(selectedType.value))
   }
 
   return filtered
