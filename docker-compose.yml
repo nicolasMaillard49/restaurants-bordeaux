@@ -82,6 +82,7 @@ services:
       - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678}
       - GENERIC_TIMEZONE=${TIMEZONE:-Europe/Paris}
+      - NODE_FUNCTION_ALLOW_EXTERNAL=cheerio
     ports:
       - "${N8N_PORT:-5678}:5678"
     volumes:

@@ -51,7 +51,9 @@ export const translations = {
       all: 'Tous',
       openNow: 'Ouvert actuellement',
       topRated: 'Top notés (4.5+)',
-      recent: 'Récents'
+      recent: 'Récents',
+      allCuisines: 'Toutes les cuisines',
+      allTypes: 'Tous les types'
     },
     search: {
       placeholder: 'Rechercher...',
@@ -161,7 +163,9 @@ export const translations = {
       all: 'All',
       openNow: 'Open now',
       topRated: 'Top rated (4.5+)',
-      recent: 'Recent'
+      recent: 'Recent',
+      allCuisines: 'All cuisines',
+      allTypes: 'All types'
     },
     search: {
       placeholder: 'Search...',
@@ -271,7 +275,9 @@ export const translations = {
       all: 'Todos',
       openNow: 'Abierto ahora',
       topRated: 'Mejor valorados (4.5+)',
-      recent: 'Recientes'
+      recent: 'Recientes',
+      allCuisines: 'Todas las cocinas',
+      allTypes: 'Todos los tipos'
     },
     search: {
       placeholder: 'Buscar...',

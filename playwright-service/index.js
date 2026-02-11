@@ -398,6 +398,42 @@ app.post('/scrape-articles-bordeaux', async (req, res) => {
     }
 });
 
+// Scrape page HTML content for text extraction
+app.post('/scrape-content', async (req, res) => {
+    const { website } = req.body;
+
+    if (!website) {
+        return res.json({ html: '', source: 'no_website' });
+    }
+
+    if (website.toLowerCase().includes('instagram')) {
+        return res.json({ html: '', source: 'instagram_skipped' });
+    }
+
+    let page = null;
+    try {
+        const b = await getBrowser();
+        page = await b.newPage();
+
+        await page.goto(website, {
+            timeout: 15000,
+            waitUntil: 'domcontentloaded'
+        });
+        await page.waitForTimeout(1500);
+
+        const html = await page.content();
+        await page.close();
+
+        res.json({ html, source: 'playwright' });
+    } catch (error) {
+        console.error(`Content scrape error for ${website}: ${error.message}`);
+        if (page) {
+            await page.close().catch(() => {});
+        }
+        res.json({ html: '', source: 'playwright_error', error: error.message });
+    }
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
