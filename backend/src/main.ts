@@ -16,8 +16,13 @@ async function bootstrap() {
 
   // CORS pour permettre les requêtes depuis le frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL || '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: [
+      process.env.FRONTEND_URL || 'https://restaurants-bordeaux.com',
+      'https://www.restaurants-bordeaux.com',
+      'http://localhost:3001',
+      'http://localhost:3000',
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
