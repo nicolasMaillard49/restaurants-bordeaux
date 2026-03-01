@@ -480,6 +480,9 @@
       </div>
     </section>
 
+    <!-- Contact Form -->
+    <ContactForm />
+
     <!-- Footer -->
     <AppFooter
       :restaurant-count="restaurants?.length || 0"
@@ -667,6 +670,10 @@ function scrollToArticles(): void {
 }
 
 function scrollToSearch(): void {
+}
+
+function scrollToContact(): void {
+  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
   scrollToRestaurants()
   setTimeout(() => {
     searchInputRef.value?.focus()

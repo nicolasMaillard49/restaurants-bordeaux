@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './modules/restaurants.module';
+import { ContactModule } from './modules/contact.module';
 import { ArticlesModule } from './modules/articles.module';
 import { Restaurant } from './entities/restaurant.entity';
 import { Article } from './entities/article.entity';
@@ -32,6 +33,7 @@ import { Article } from './entities/article.entity';
 
     // Modules métier
     RestaurantsModule,
+    ContactModule,
     ArticlesModule,
   ],
 })

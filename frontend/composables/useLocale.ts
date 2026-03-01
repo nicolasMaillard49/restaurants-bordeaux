@@ -105,6 +105,19 @@ export const translations = {
       viewMenu: 'Voir le menu',
       formulas: 'Formules'
     },
+    contact: {
+      title: 'Contactez-nous',
+      subtitle: 'Une question, une suggestion ou un restaurant à recommander ? Écrivez-nous !',
+      name: 'Votre nom',
+      email: 'Votre email',
+      subject: 'Sujet',
+      subjectOptions: { suggestion: 'Suggérer un restaurant', question: 'Question générale', partnership: 'Partenariat', bug: 'Signaler un problème', other: 'Autre' },
+      message: 'Votre message',
+      send: 'Envoyer',
+      sending: 'Envoi en cours...',
+      success: 'Message envoyé avec succès ! Nous vous répondrons bientôt.',
+      error: 'Une erreur est survenue. Veuillez réessayer.'
+    },
     articles: {
       title: 'Actualités gastronomiques',
       subtitle: 'Les dernières nouvelles de la scène culinaire bordelaise',
@@ -217,6 +230,19 @@ export const translations = {
       viewMenu: 'View menu',
       formulas: 'Set menus'
     },
+    contact: {
+      title: 'Contact us',
+      subtitle: 'Have a question, a suggestion or a restaurant to recommend? Write to us!',
+      name: 'Your name',
+      email: 'Your email',
+      subject: 'Subject',
+      subjectOptions: { suggestion: 'Suggest a restaurant', question: 'General question', partnership: 'Partnership', bug: 'Report an issue', other: 'Other' },
+      message: 'Your message',
+      send: 'Send',
+      sending: 'Sending...',
+      success: 'Message sent successfully! We will get back to you soon.',
+      error: 'An error occurred. Please try again.'
+    },
     articles: {
       title: 'Food news',
       subtitle: 'The latest news from the Bordeaux culinary scene',
@@ -328,6 +354,19 @@ export const translations = {
       teamChoice: 'Elección del equipo',
       viewMenu: 'Ver el menú',
       formulas: 'Menús'
+    },
+    contact: {
+      title: 'Contáctenos',
+      subtitle: '¿Una pregunta, una sugerencia o un restaurante para recomendar? ¡Escríbanos!',
+      name: 'Su nombre',
+      email: 'Su email',
+      subject: 'Asunto',
+      subjectOptions: { suggestion: 'Sugerir un restaurante', question: 'Pregunta general', partnership: 'Asociación', bug: 'Reportar un problema', other: 'Otro' },
+      message: 'Su mensaje',
+      send: 'Enviar',
+      sending: 'Enviando...',
+      success: '¡Mensaje enviado con éxito! Le responderemos pronto.',
+      error: 'Ha ocurrido un error. Por favor, inténtelo de nuevo.'
     },
     articles: {
       title: 'Noticias gastronómicas',
