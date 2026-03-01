@@ -33,6 +33,11 @@ services:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: ${POSTGRES_USER:-postgres}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_NAME: ${POSTGRES_DB:-restaurants}
       API_SECRET_KEY: ${API_SECRET_KEY:-change-me-in-production}
