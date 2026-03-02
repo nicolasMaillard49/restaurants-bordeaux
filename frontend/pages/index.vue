@@ -366,12 +366,22 @@
           <!-- Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <RestaurantCard
-              v-for="(restaurant, index) in sortedRestaurants"
+              v-for="(restaurant, index) in visibleRestaurants"
               :key="restaurant.id"
               :restaurant="restaurant"
               :is-featured="isFeatured(restaurant)"
               :animation-delay="index * 50"
             />
+          </div>
+
+          <!-- Load More Button -->
+          <div v-if="hasMoreRestaurants" class="flex justify-center mt-10 sm:mt-14">
+            <button
+              @click="loadMore"
+              class="px-8 py-3.5 bg-bordeaux-600 hover:bg-bordeaux-700 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              {{ t.ui.viewMore }}
+            </button>
           </div>
         </div>
       </div>
@@ -517,6 +527,7 @@ const { data: articles } = await useAsyncData(
 )
 
 const searchQuery = ref('')
+nconst displayedCount = ref(12)
 const selectedFilter = ref('all')
 const sortBy = ref('rating')
 const selectedCuisineOrigin = ref('')
@@ -628,6 +639,14 @@ const sortedRestaurants = computed(() => {
   return sorted
 })
 
+
+const visibleRestaurants = computed(() =>
+  sortedRestaurants.value?.slice(0, displayedCount.value) || []
+)
+
+const hasMoreRestaurants = computed(() =>
+  (sortedRestaurants.value?.length || 0) > displayedCount.value
+)
 const averageRating = computed(() => {
   if (!restaurants.value || restaurants.value.length === 0) return '0.0'
   const sum = restaurants.value.reduce((acc, r) => acc + toRating(r), 0)
@@ -652,6 +671,10 @@ function formatArticleDate(dateStr: string | null): string {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function loadMore(): void {
+  displayedCount.value += 12
 }
 
 function scrollArticles(direction: 'left' | 'right'): void {
