@@ -527,7 +527,8 @@ const { data: articles } = await useAsyncData(
 )
 
 const searchQuery = ref('')
-nconst displayedCount = ref(12)
+
+const displayedCount = ref(12)
 const selectedFilter = ref('all')
 const sortBy = ref('rating')
 const selectedCuisineOrigin = ref('')
